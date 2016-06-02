@@ -1,5 +1,4 @@
 #include <windows.h>
-#include <"C:\Windows\System32\gdi32.dll">
 
 LRESULT CALLBACK MainWindowCallBack(
   HWND   Window,
@@ -41,11 +40,18 @@ LRESULT CALLBACK MainWindowCallBack(
 			int Y = Paint.rcPaint.top;
 			int Width = Paint.rcPaint.right - Paint.rcPaint.left;
 			int Height = Paint.rcPaint.bottom - Paint.rcPaint.top;
+			static DWORD Operation = WHITENESS;
+			PatBlt(DeviceContext, X, Y, Width, Height, Operation);
 			
+			if(Operation == WHITENESS)
+			{
+				Operation = BLACKNESS;
+			}
+			else
+			{
+				Operation = WHITENESS;
+			}
 			
-			// Note To Ash: Find how to include gdi32.lib
-			PatBlt(DeviceContext, X, Y, Width, Height, WHITENESS);
-
 			EndPaint(Window, &Paint);
 			break;
 		}
