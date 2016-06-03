@@ -1,6 +1,22 @@
 #include <windows.h>
 
-LRESULT CALLBACK MainWindowCallBack(
+#define internal static 
+#define local_persist static
+#define global_variable static
+
+global_variable bool Running;
+
+internal void Win32ResizeDIBSection(int Width, int Height)
+{
+	
+}
+
+internal void Win32UpdateWindow(HWND Window, int X, int Y, int Width, int Height)
+{
+	
+}
+
+LRESULT CALLBACK Win32MainWindowCallBack(
   HWND   Window,
   UINT   Message,
   WPARAM wParam,
@@ -13,16 +29,23 @@ LRESULT CALLBACK MainWindowCallBack(
 	{
 		case WM_SIZE:
 		{
+			RECT ClientRect;
+			GetClientRect(Window, &ClientRect);
+			int Width = ClientRect.right - ClientRect.left;
+			int Height = ClientRect.bottom - ClientRect.top;
+			Win32ResizeDIBSection(Width, Height);
 			OutputDebugStringA("WM_SIZE\n");
 			break;
 		}
 		case WM_DESTROY:
 		{
+			Running = false;
 			OutputDebugStringA("WM_DESTROY\n");
 			break;
 		}
 		case WM_CLOSE:
 		{
+			Running = false;
 			OutputDebugStringA("WM_CLOSE\n");
 			break;
 		}
@@ -40,17 +63,8 @@ LRESULT CALLBACK MainWindowCallBack(
 			int Y = Paint.rcPaint.top;
 			int Width = Paint.rcPaint.right - Paint.rcPaint.left;
 			int Height = Paint.rcPaint.bottom - Paint.rcPaint.top;
-			static DWORD Operation = WHITENESS;
-			PatBlt(DeviceContext, X, Y, Width, Height, Operation);
 			
-			if(Operation == WHITENESS)
-			{
-				Operation = BLACKNESS;
-			}
-			else
-			{
-				Operation = WHITENESS;
-			}
+			Win32UpdateWindow(Window, X, Y, Width, Height);
 			
 			EndPaint(Window, &Paint);
 			break;
@@ -75,7 +89,7 @@ int CALLBACK WinMain(
 {
 	WNDCLASS WindowClass = {};
 	WindowClass.style = CS_OWNDC|CS_HREDRAW|CS_VREDRAW;
-	WindowClass.lpfnWndProc = MainWindowCallBack;
+	WindowClass.lpfnWndProc = Win32MainWindowCallBack;
 	WindowClass.hInstance = Instance;
 	//WindowClass.hIcon;
 	WindowClass.lpszClassName = "HandmadeHeroWindowClass";
@@ -100,7 +114,9 @@ int CALLBACK WinMain(
 		if(WindowHandle)
 		{
 			MSG Message;
-			for(;;)
+			
+			Running = true;
+			while(Running)
 			{
 				BOOL MessageResult = GetMessage(&Message,0,0,0);
 				
